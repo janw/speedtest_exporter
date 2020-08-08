@@ -27,7 +27,6 @@ import (
 	prom_version "github.com/prometheus/common/version"
 
 	"github.com/nlamirault/speedtest_exporter/speedtest"
-	"github.com/nlamirault/speedtest_exporter/version"
 )
 
 const (
@@ -51,6 +50,12 @@ var (
 		nil, nil,
 	)
 )
+
+// Version represents the application version using SemVer
+const Version string = "0.3.1"
+
+// BuildTime holds the time of build for the binary
+var BuildTime string = "<unset>"
 
 // Exporter collects Speedtest stats from the given server and exports them using
 // the prometheus metrics package.
@@ -112,7 +117,8 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Printf("Speedtest Prometheus exporter. v%s\n", version.Version)
+		fmt.Printf("Speedtest Prometheus exporter. v%s\n", Version)
+		fmt.Printf("Build at %s\n", BuildTime)
 		os.Exit(0)
 	}
 

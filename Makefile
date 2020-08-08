@@ -84,7 +84,7 @@ deps: ## Install dependencies
 .PHONY: build
 build: ## Make binary
 	@echo -e "$(OK_COLOR)[$(APP)] Build $(NO_COLOR)"
-	@$(GO) build .
+	@$(GO) build -ldflags "-X 'version//version.BuildTime=$(date)'" .
 
 .PHONY: test
 test: ## Launch unit tests
