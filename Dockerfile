@@ -21,29 +21,35 @@ ENV GO111MODULE=on
 
 RUN apk update \
     && apk add --no-cache git ca-certificates tzdata \
-    && update-ca-certificates
+    && update-ca-certificates \
+    && mkdir -p /build/etc \
+    && echo 'nobody:x:65534:65534:nobody:/:/sbin/nologin' > /build/etc/passwd
 
-RUN adduser -D -g '' appuser
-
-ADD . ${GOPATH}/src/app/
 WORKDIR ${GOPATH}/src/app
 
-RUN go build -a -installsuffix cgo -ldflags="-w -s" -o /go/bin/speedtest_exporter
+COPY go.* speedtest_exporter* ./
+COPY speedtest ./speedtest
+
+RUN go mod download \
+    && go mod verify
+RUN go build -a -installsuffix cgo \
+    -ldflags="-w -s -X 'main.BuildTime=$(date -Iseconds --utc)'" \
+    -o /build/speedtest_exporter
 
 # --------------------------------------------------------------------------------
 
-FROM gcr.io/distroless/base
-
+FROM scratch
 LABEL summary="Speedtest Prometheus exporter" \
-      description="A Prometheus exporter for speedtest" \
-      name="nlamirault/speedtest_exporter" \
-      url="https://github.com/nlamirault/speedtest_exporter" \
-      maintainer="Nicolas Lamirault <nicolas.lamirault@gmail.com>"
+      description="A Prometheus exporter for speedtest.net tests" \
+      name="janwh/speedtest_exporter" \
+      url="https://github.com/janw/speedtest_exporter" \
+      maintainer="Jan Willhaus <mail@janwillhaus.de>"
 
-COPY --from=builder /go/bin/speedtest_exporter /usr/bin/speedtest_exporter
 
-COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /build /
+USER nobody
 
 EXPOSE 9112
 
-ENTRYPOINT [ "/usr/bin/speedtest_exporter" ]
+ENTRYPOINT [ "/speedtest_exporter" ]
