@@ -52,7 +52,7 @@ var (
 )
 
 // Version represents the application version using SemVer
-const Version string = "0.3.1"
+const Version string = "0.3.2"
 
 // BuildTime holds the time of build for the binary
 var BuildTime string = "<unset>"
