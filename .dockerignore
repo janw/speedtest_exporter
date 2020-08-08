@@ -1,0 +1,5 @@
+speedtest_exporter
+*.md
+*.yml
+hooks
+snap

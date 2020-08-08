@@ -1,6 +1,11 @@
 #!/bin/bash
-docker tag $IMAGE_NAME $DOCKER_REPO:$SOURCE_COMMIT
-docker push $DOCKER_REPO:$SOURCE_COMMIT
-export GO_VERSION=$(cat version/version.go | awk 'match($0, /[0-9].[0-9].[0-9]/) {print substr( $0, RSTART, RLENGTH )}')
-docker tag $IMAGE_NAME $DOCKER_REPO:${GO_VERSION}
-docker push $DOCKER_REPO:${GO_VERSION}
+set -euo pipefail
+
+docker tag "$IMAGE_NAME" "$DOCKER_REPO:$SOURCE_COMMIT"
+docker push "$DOCKER_REPO:$SOURCE_COMMIT"
+
+GO_VERSION="$(grep 'const Version' speedtest_exporter.go | \
+    awk 'match($0, /[0-9].[0-9].[0-9]/) {print substr( $0, RSTART, RLENGTH )}')"
+
+docker tag "$IMAGE_NAME" "$DOCKER_REPO:${GO_VERSION}"
+docker push "$DOCKER_REPO:${GO_VERSION}"
